@@ -1,0 +1,18 @@
+server {
+    if ( $host !~* ^(DOMAIN)$ ) {
+        return 444;
+    }
+    server_name DOMAIN;
+    client_max_body_size 20M;
+    listen 80 default_server;
+
+    location = /favicon.ico { access_log off; log_not_found off; }
+    location /static/ {
+        root PROJECT_MANAGE_PY_DIR;
+    }
+
+    location / {
+        include proxy_params;
+        proxy_pass http://unix:PROJECT_DIR/run/PROJECT_NAME.sock;
+    }
+}

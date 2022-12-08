@@ -1,0 +1,29 @@
+# Python
+*.pyc
+
+# Editor
+*.DS_Store
+.idea/*
+.vscode/*
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# Django media
+*/media/*
+
+# Temp files
+~*
+
+# Database dumps
+*.dump
+database_dumps/*
+
+# Config files
+dev_config.ini
+prod_config.ini
+
+leadtracker_v1/v1/leadtracker/migrations
+leadtracker_v1/v1/accounts/migrations
+leadtracker_v1/v1/communications/migrations
