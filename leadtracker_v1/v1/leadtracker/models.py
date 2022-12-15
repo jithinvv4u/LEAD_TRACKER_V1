@@ -91,12 +91,16 @@ class Lead(AbstractBaseModel):
         default=lead_consts.LeadSourceChoice.LINKEDIN,
         choices=lead_consts.LeadSourceChoice.choices(),
         verbose_name=_('Lead Source'))
-    is_active = models.BooleanField(
-        default=True, verbose_name=_('Is Active'))
+    status = models.IntegerField(
+        default=lead_consts.StatusChoice.ACTIVE,
+        choices=lead_consts.StatusChoice.choices(),
+        verbose_name=_('Lead Status'))
+    # is_active = models.BooleanField(
+    #     default=True, verbose_name=_('Is Active'))
     current_stage = models.ForeignKey(
         'leadtracker.Stage', on_delete=models.CASCADE,
         related_name='leads', verbose_name=_('Current Stage'),
-        blank=True, null=True, default=None)
+        blank=True, null=True, default='')
     
     def __str__(self):
         """String format of model object"""

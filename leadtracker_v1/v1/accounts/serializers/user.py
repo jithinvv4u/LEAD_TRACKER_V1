@@ -12,83 +12,57 @@ from common.drf_custom.mixins import WriteOnceMixin
 from common.library import validate_password, decode
 from common.library import pop_out_from_dictionary
 
-from v1.accounts import validator as accounts_validator
-
 from v1.accounts.models import ProjectUser
 from v1.accounts.models import Person
 from v1.accounts.models import UserDevice
 from v1.accounts.models import TermsAndConditions
 
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
 
 class UserSerializer(WriteOnceMixin, serializers.ModelSerializer):
     """Serializer for user."""
 
     id = custom_fields.IdencodeField(read_only=True)
     first_name = serializers.CharField()
-    # last_name = serializers.CharField()
     email = serializers.CharField()  # TODO: change to write_once field
-    # updated_email = serializers.CharField(required=False, allow_blank=True)
-    # dob = serializers.DateField(required=False)
-    # phone = custom_fields.PhoneNumberField(required=False, allow_blank=True)
-    # address = serializers.CharField(required=False)
-    # image = custom_fields.RemovableImageField(required=False, allow_blank=True)
-    # # type = serializers.IntegerField(required=False)
     status = serializers.IntegerField(required=False)
 
     terms_accepted = serializers.BooleanField(required=False)
     privacy_accepted = serializers.BooleanField(required=False)
     email_verified = serializers.BooleanField(required=False)
-
     password = serializers.CharField(write_only=True)
-    # current_password = serializers.CharField(write_only=True, required=False)
-    # new_password = serializers.CharField(write_only=True, required=False)
 
     class Meta:
         """Meta info."""
-
-        # TODO: remove unwanted field. check required fields
 
         model = ProjectUser
         fields = [
             "id",
             "first_name",
-            # "last_name",
             "email",
-            # "dob",
-            # "phone",
-            # "address",
             "password",
             "terms_accepted",
             "privacy_accepted",
             "email_verified",
             "status",
-            # "image",
-            # "current_password",
-            # "new_password",
-            # "updated_email",
         ]
 
-        # write_once_fields = ("type", "user", "password", "email_verified")
         write_once_fields = ("password")
 
     def validate_username(self, value):
-        """Function to validate username."""
-        validator = accounts_validator.validate_username(value)
-        if not validator["valid"]:
-            raise serializers.ValidationError("Invalid username")
-        if not validator["available"]:
-            raise serializers.ValidationError("Email already taken")
-        return value
-
-    # def update_email(self, instance, validated_data):  # TODO: move to model method
-    #     """Function to update email and send verification email"""
-    #     self.validate_username(validated_data["email"])
-    #     # validated_data['username'] = validated_data['email']
-    #     instance.updated_email = validated_data["email"]
-    #     instance.save()
-    #     instance.verify_new_email()
-    #     return True
-
+           """Function to validate username."""
+           value = value.lower()
+           try:
+               validate_email(value)
+           except ValidationError:
+               raise serializers.ValidationError(_('Invalid Email ID.'))
+           else:
+               if ProjectUser.objects.filter(username=value).exists():
+                   raise serializers.ValidationError(_('Email already taken'))
+           return value
+       
     def update_password(self, instance, validated_data):
         """Function to update password"""
         if not "current_password" in validated_data.keys():
@@ -140,8 +114,8 @@ class UserSerializer(WriteOnceMixin, serializers.ModelSerializer):
         if "password" in validated_data.keys():
             user.set_password(validated_data["password"])
             user.save()
-        if self.context.get("view", None):
-            user.verify_email()  # TODO: change to a context variable
+        # if self.context.get("view", None):
+            # user.verify_email()  # TODO: change to a context variable
 
         return user
 
@@ -161,7 +135,7 @@ class UserListSerializer(serializers.ModelSerializer):
         """Meta info."""
 
         model = ProjectUser
-        fields = ["id", "first_name", "last_name", "email", "phone", "image"]
+        fields = ["id", "first_name", "email"]
 
 
 class UserDeviceSerializer(WriteOnceMixin, serializers.ModelSerializer):

@@ -22,3 +22,9 @@ class QuestionTypeChoice(ChoiceAdapter):
     CHECKBOX = 3,
     RANGE = 4,
     BOOL = 5,
+    
+#Question field Type choice 
+class StatusChoice(ChoiceAdapter):
+    ACTIVE = 1, 
+    WON = 2, 
+    LOST = 3, 

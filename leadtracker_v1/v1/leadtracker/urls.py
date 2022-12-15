@@ -10,6 +10,11 @@ router.register("lead", lead_view.LeadViewSet, basename="lead")
 router.register("organization", lead_view.OrganizationView,
                 basename="organization")
 
+router.register("contact", lead_view.ContactViewSet,
+                basename="contact")
+router.register("leadcontact", lead_view.LeadContactViewSet,
+                basename="leadcontact")
+
 urlpatterns = [
     path("", include(router.urls)),
     
@@ -19,5 +24,7 @@ urlpatterns = [
     #url to create and view answers
     path("stageanswer/", lead_view.StageAnswerView.as_view()),
     path("generalanswer/", lead_view.GeneralAnswerView.as_view()),
+    
+    path("dashboard/", lead_view.DashboardView.as_view()),
 
 ]

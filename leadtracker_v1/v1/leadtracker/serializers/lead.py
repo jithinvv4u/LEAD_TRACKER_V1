@@ -11,10 +11,7 @@ class TagSerializer(serializers.ModelSerializer):
         """Meta Info."""
 
         model = lead_models.Tag
-        fields = (
-            "id",
-            "name",
-        )
+        fields = ("idencode", "name", )
 
 
 class StagePresetSerializer(serializers.ModelSerializer):
@@ -26,10 +23,7 @@ class StagePresetSerializer(serializers.ModelSerializer):
         """Meta Info."""
 
         model = lead_models.StagePreset
-        fields = (
-            "id",
-            "name",
-        )
+        fields = ("idencode", "name", )
 
 
 class OrganizationSerializer(serializers.ModelSerializer):
@@ -42,11 +36,8 @@ class OrganizationSerializer(serializers.ModelSerializer):
 
         model = lead_models.Organization
         fields = (
-            "idencode",
-            "name",
-            "email",
-            "website",
-            "country",
+            "idencode", "name", "email",
+            "website", "country",
         )
 
 
@@ -63,13 +54,8 @@ class LeadSerializer(serializers.ModelSerializer):
 
         model = lead_models.Lead
         fields = (
-            "idencode",
-            "name",
-            "pipedrive",
-            "team_size",
-            "revenue",
-            "lead_source",
-            "organizations",
+            "idencode", "name", "pipedrive", "team_size",
+            "revenue", "lead_source", "organizations",
         )
 
     def create(self, validated_data):
@@ -91,11 +77,8 @@ class LeadListSerializer(serializers.ModelSerializer):
 
         model = lead_models.Lead
         fields = (
-            "idencode",
-            "name",
-            "organizations",
-            "updated_on",
-            "current_stage",
+            "idencode", "name", "organizations",
+            "updated_on", "current_stage",
         )
 
     # def to_representation(self, instance):
@@ -112,10 +95,8 @@ class OptionSerializer(serializers.ModelSerializer):
         """Meta Info"""
 
         model = lead_models.Option
-        fields = (
-            "idencode",
+        fields = ("idencode", "option",
             # "question_id",
-            "option",
             # "points",
         )
 
@@ -144,11 +125,8 @@ class StageAnswerSerializer(serializers.ModelSerializer):
 
         model = lead_models.StageAnswer
         fields = (
-            "stage_id",
-            "lead_id",
-            "question_id",
-            "option_id",
-            "score",
+            "idencode", "stage_id", "lead_id",
+            "question_id", "option_id", "score",
         )
 
     # def create(self, validated_data):
@@ -166,11 +144,7 @@ class GeneralAnswerSerializer(serializers.ModelSerializer):
 
         model = lead_models.GeneralAnswer
         fields = (
-            "lead_id",
-            "question_id",
-            "option_id",
-            "score",
-        )
+            "idencode", "lead_id", "question_id", "option_id", "score", )
 
 
 class StageSerializer(serializers.ModelSerializer):
@@ -182,12 +156,7 @@ class StageSerializer(serializers.ModelSerializer):
         """Meta Info"""
 
         model = lead_models.Stage
-        fields = (
-            "id",
-            "name",
-            "weightage",
-            "credit",
-        )
+        fields = ( "idencode", "name", "weightage", "credit", )
 
 
 class ContactSerializer(serializers.ModelSerializer):
@@ -199,4 +168,18 @@ class ContactSerializer(serializers.ModelSerializer):
         """Meta Info"""
 
         model = lead_models.Contact
-        fields = ("id", "name", "email", "organization", "role", "linkedin")
+        fields = ("idencode", "name", "email", "organization", "role", "linkedin")
+
+
+class LeadContactSerializer(serializers.ModelSerializer):
+    """
+    Serializer for Lead Contact.
+    """
+
+    class Meta:
+        """Meta Info"""
+
+        model = lead_models.LeadContact
+        fields = (
+            "idencode", "contact_id", "lead_id", "stage_id",
+            "is_decision_maker", "is_board_member", )
