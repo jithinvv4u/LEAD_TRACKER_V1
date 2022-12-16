@@ -1,11 +1,11 @@
 """ Models for leadtracker """
 
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 from common.models import AbstractBaseModel
 from common.library import get_file_path
 
-from django.utils.translation import gettext_lazy as _
 from v1.leadtracker import constants as lead_consts
 # Create your models here.
 
@@ -53,6 +53,45 @@ class StagePreset(AbstractBaseModel):
         """String format of model object"""
         return f'{self.name}'
 
+ 
+class Organization(AbstractBaseModel):
+    """
+    Model to save organization details.
+
+    Attribs:
+        name(char)  : Name of Organization.
+        email(obj)  : Organization email.
+        website(obj): Organization website.
+        country(obj): Organization country.
+
+    Inherited Attribs:
+        lead_id(obj): Lead object of organization.
+        creator(obj): Creator user of the object.
+        updater(obj): Updater of the object.
+        created_on(datetime): Added date of the object.
+        updated_on(datetime): Last updated date of the object.
+    """
+    # lead_id = models.ForeignKey(
+    #     'leadtracker.Lead', on_delete=models.CASCADE, 
+    #     related_name='organizations', verbose_name=_('Lead ID'), 
+        # blank=True, null=True, default=None)
+    name = models.CharField(
+        max_length=100, verbose_name=_('Organization Name'))
+    email = models.EmailField(verbose_name=_('Organization Email'))
+    website = models.CharField(
+        max_length=500, default='', blank=True, null=True,
+        verbose_name=_('organization website'))
+    country = models.CharField(
+        max_length=100, verbose_name=_('Organization Country'),
+        default='', blank=True, null=True,
+        
+    )
+    
+    def __str__(self):
+        """String format of model object"""
+        return f'{self.name}'
+    
+    
 class Lead(AbstractBaseModel):
     """
     Model to save Lead details.
@@ -78,6 +117,10 @@ class Lead(AbstractBaseModel):
         'leadtracker.StagePreset', on_delete=models.CASCADE,
         related_name='leads', verbose_name=_('Preset ID'),
         blank=True, null=True, default=None)
+    organization = models.ForeignKey(
+        'leadtracker.Organization', on_delete=models.CASCADE, 
+        related_name='leads',verbose_name=_('Organization'), 
+        blank=True, null=True, default='')
     name = models.CharField(
         max_length=100, verbose_name=_('Lead Name'))
     pipedrive = models.URLField(
@@ -95,8 +138,6 @@ class Lead(AbstractBaseModel):
         default=lead_consts.StatusChoice.ACTIVE,
         choices=lead_consts.StatusChoice.choices(),
         verbose_name=_('Lead Status'))
-    # is_active = models.BooleanField(
-    #     default=True, verbose_name=_('Is Active'))
     current_stage = models.ForeignKey(
         'leadtracker.Stage', on_delete=models.CASCADE,
         related_name='leads', verbose_name=_('Current Stage'),
@@ -104,45 +145,8 @@ class Lead(AbstractBaseModel):
     
     def __str__(self):
         """String format of model object"""
-        return f'{self.name}'
-    
-    
-class Organization(AbstractBaseModel):
-    """
-    Model to save organization details.
+        return f'{self.name,self.lead_source}'
 
-    Attribs:
-        name(char)  : Name of Organization.
-        email(obj)  : Organization email.
-        website(obj): Organization website.
-        country(obj): Organization country.
-
-    Inherited Attribs:
-        lead_id(obj): Lead object of organization.
-        creator(obj): Creator user of the object.
-        updater(obj): Updater of the object.
-        created_on(datetime): Added date of the object.
-        updated_on(datetime): Last updated date of the object.
-    """
-    lead_id = models.ForeignKey(
-        'leadtracker.Lead', on_delete=models.CASCADE, related_name='organizations',
-        verbose_name=_('Lead ID'), blank=True, null=True, default=None)
-    name = models.CharField(
-        max_length=100, verbose_name=_('Organization Name'))
-    email = models.EmailField(verbose_name=_('Organization Email'))
-    website = models.CharField(
-        max_length=500, default='', blank=True, null=True,
-        verbose_name=_('organization website'))
-    country = models.CharField(
-        max_length=100, verbose_name=_('Organization Country'),
-        default='', blank=True, null=True,
-        
-    )
-    
-    def __str__(self):
-        """String format of model object"""
-        return f'{self.name}'
-    
     
 class LeadTag(AbstractBaseModel):
     """
@@ -256,7 +260,7 @@ class Option(AbstractBaseModel):
     """
     question_id = models.ForeignKey(
         'leadtracker.Question', on_delete=models.CASCADE,
-        related_name='questions', verbose_name=_('Question'), 
+        related_name='options', verbose_name=_('Question'), 
         blank=True, null=True, default=None)
     option = models.CharField(
         max_length=500, verbose_name=_('Options'),
@@ -295,8 +299,9 @@ class StageAnswer(AbstractBaseModel):
         related_name='stageanswers', verbose_name=_('Question'), 
         blank=True, null=True, default=None)
     lead_id = models.ForeignKey(
-        'leadtracker.Lead', on_delete=models.CASCADE, related_name='answers',
-        verbose_name=_('Lead'), blank=True, null=True, default=None)
+        'leadtracker.Lead', on_delete=models.CASCADE, 
+        related_name='stageanswers', verbose_name=_('Lead'), 
+        blank=True, null=True, default=None)
     stage_id = models.ForeignKey(
         'leadtracker.Stage', on_delete=models.CASCADE,
         related_name='stageanswers', verbose_name=_('Stage'), 
@@ -359,9 +364,10 @@ class Contact(AbstractBaseModel):
     name = models.CharField(
         max_length=100,verbose_name=_('Name'))
     email = models.EmailField(verbose_name=_('Email'))
-    organization = models.CharField(
-        max_length=100, default='', blank=True, null=True,
-        verbose_name=_('Organization Name'))
+    organization = models.ForeignKey(
+        'leadtracker.Organization', on_delete=models.CASCADE, 
+        related_name="contact", verbose_name='Organization',
+        blank=True, null=True, default=None)
     role = models.CharField(
         max_length=100, default='', blank=True, null=True,
         verbose_name=_('Role'))
@@ -393,14 +399,15 @@ class LeadContact(AbstractBaseModel):
     """
     contact_id = models.ForeignKey(
         'leadtracker.Contact', on_delete=models.CASCADE,
-        related_name='contacts', verbose_name=_('Contact ID'), 
+        related_name='lead_contacts', verbose_name=_('Contact'), 
         blank=True, null=True, default=None)
     lead_id = models.ForeignKey(
-        'leadtracker.Lead', on_delete=models.CASCADE, related_name='contacts',
-        verbose_name=_('Lead ID'), blank=True, null=True, default=None)
+        'leadtracker.Lead', on_delete=models.CASCADE, 
+        related_name='lead_contacts', verbose_name=_('Lead'), 
+        blank=True, null=True, default=None)
     stage_id = models.ForeignKey(
         'leadtracker.Stage', on_delete=models.CASCADE,
-        related_name='contacts', verbose_name=_('Stage ID'), 
+        related_name='lead_contacts', verbose_name=_('Stage'), 
         blank=True, null=True, default=None)
     is_decision_maker = models.BooleanField(
         default=False, verbose_name=_('Is Decision Maker'))
