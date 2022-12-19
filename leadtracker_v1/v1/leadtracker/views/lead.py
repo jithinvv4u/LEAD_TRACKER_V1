@@ -7,10 +7,8 @@ from v1.leadtracker import models as lead_model
 from v1.leadtracker.serializers import lead as lead_serializer
 from v1.accounts import permissions as user_permission
 
-from django.shortcuts import get_object_or_404
 from django.db.models import Count, F
 
-# from common.library import decode
 from common import library as comm_lib
 
 
@@ -21,9 +19,10 @@ class IddecodeModelViewSet(viewsets.ModelViewSet):
             pk=comm_lib._decode(self.kwargs['pk']))
 
 
-class LeadViewSet(viewsets.ModelViewSet):
+class LeadViewSet(IddecodeModelViewSet):
     """
     ViewSet to perform crud operations on lead.
+    *authetication permission required.
     """
 
     queryset = lead_model.Lead.objects.all()
@@ -34,7 +33,7 @@ class LeadViewSet(viewsets.ModelViewSet):
 
 class OrganizationView(viewsets.ModelViewSet):
     """
-    View for listing questions and answers.
+    View to perform operations on Organization.
     """
 
     queryset = lead_model.Organization.objects.all()
@@ -43,20 +42,9 @@ class OrganizationView(viewsets.ModelViewSet):
     authentication_classes = []
 
 
-class StageAnswerView(generics.ListCreateAPIView):
-    """
-    View for listing questions and answers.
-    """
-
-    queryset = lead_model.StageAnswer.objects.all()
-    serializer_class = lead_serializer.StageAnswerSerializer
-    permission_classes = (user_permission.IsAuthenticated,)
-    authentication_classes = []
-
-
 class QuestionView(viewsets.ModelViewSet):
     """
-    Viewset for listing questions and answers.
+    Viewset to list all question with options.
     """
 
     queryset = lead_model.Question.objects.all()
@@ -65,9 +53,20 @@ class QuestionView(viewsets.ModelViewSet):
     authentication_classes = []
 
 
+class StageAnswerView(generics.ListCreateAPIView):
+    """
+    View for create and list Stage Answers.
+    """
+
+    queryset = lead_model.StageAnswer.objects.all()
+    serializer_class = lead_serializer.StageAnswerSerializer
+    permission_classes = (user_permission.IsAuthenticated,)
+    authentication_classes = []
+
+
 class GeneralAnswerView(generics.ListCreateAPIView):
     """
-    View for listing questions and answers.
+    View for create and list General Answers.
     """
 
     queryset = lead_model.GeneralAnswer.objects.all()
@@ -89,7 +88,7 @@ class LeadListView(generics.ListCreateAPIView):
 
 class ContactViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to perform crud operations on lead.
+    ViewSet for manage Contact details.
     """
 
     queryset = lead_model.Contact.objects.all()
@@ -100,7 +99,7 @@ class ContactViewSet(viewsets.ModelViewSet):
 
 class LeadContactViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to perform crud operations on lead.
+    ViewSet for lead contact details.
     """
 
     queryset = lead_model.LeadContact.objects.all()
@@ -125,7 +124,8 @@ class DashboardView(generics.ListAPIView):
         lead_total = lead_model.Lead.objects.all().count()
         lead_won = lead_model.Lead.objects.filter(status=2).count()
         lead_lost = lead_model.Lead.objects.filter(status=3).count()
-        lead_stage = (lead_model.Lead.objects.values(stage=F("current_stage__name"))
+        lead_stage = (lead_model.Lead.objects.values(
+            stage=F("current_stage__name"))
             .annotate(count=Count("current_stage"))
             .order_by("-count")
         )

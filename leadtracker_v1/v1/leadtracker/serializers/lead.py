@@ -127,6 +127,7 @@ class OptionSerializer(serializers.ModelSerializer):
 class QuestionSerializer(serializers.ModelSerializer):
     """
     Serializer for Question.
+    Nested representaion of options.
     """
 
     options = OptionSerializer(many=True, read_only=True)
