@@ -1,5 +1,7 @@
 from rest_framework import serializers
 
+from django.utils.translation import gettext_lazy as _
+
 from v1.leadtracker import models as lead_models
 
 from common.drf_custom import fields as custom_fields
@@ -15,6 +17,12 @@ class TagSerializer(serializers.ModelSerializer):
 
         model = lead_models.Tag
         fields = ("idencode", "name", )
+
+    def validate(self, attrs):
+        if len(attrs['name']) > 3:
+            return attrs
+        raise serializers.ValidationError(
+            _("Tag Name should be greater than 3"))
 
 
 class StagePresetSerializer(serializers.ModelSerializer):
@@ -62,6 +70,12 @@ class LeadSerializer(serializers.ModelSerializer):
             "idencode", "name", "pipedrive", "team_size",
             "revenue", "lead_source", "organization"
         )
+        
+    def validate(self, attrs):
+        if len(attrs['name']) > 3:
+            return attrs
+        raise serializers.ValidationError(
+            _("Lead Name should be greater than 3"))
 
     # def create(self, validated_data):
     #     organization_data = validated_data.pop("organization")
@@ -69,7 +83,7 @@ class LeadSerializer(serializers.ModelSerializer):
     #     for organization in organization_data:
     #         lead_models.Organization.objects.create(lead_id=lead, **organization)
     #     return lead
-
+    
 
 class LeadListSerializer(serializers.ModelSerializer):
     """
@@ -100,10 +114,14 @@ class OptionSerializer(serializers.ModelSerializer):
         """Meta Info"""
 
         model = lead_models.Option
-        fields = ("idencode", "option",
-            # "question_id",
-            # "points",
-        )
+        fields = ("idencode", "option", "question_id", "points", )
+
+    def to_representation(self, instance):
+        data = {
+        'idencode' : instance.idencode,
+        'option' : instance.option,
+        }
+        return data
 
 
 class QuestionSerializer(serializers.ModelSerializer):
@@ -152,7 +170,7 @@ class GeneralAnswerSerializer(serializers.ModelSerializer):
     question_id = custom_fields.IdencodeField(
         related_model=lead_models.Question)
     option_id = custom_fields.IdencodeField(
-        related_model=lead_models.Option)    
+        related_model=lead_models.Option)
 
     class Meta:
         """Meta Info"""
@@ -194,7 +212,13 @@ class LeadContactSerializer(serializers.ModelSerializer):
     """
     Serializer for Lead Contact.
     """
-
+    contact_id = custom_fields.IdencodeField(
+        related_model=lead_models.Contact)
+    lead_id = custom_fields.IdencodeField(
+        related_model=lead_models.Lead)
+    stage_id = custom_fields.IdencodeField(
+        related_model=lead_models.Stage)
+    
     class Meta:
         """Meta Info"""
 

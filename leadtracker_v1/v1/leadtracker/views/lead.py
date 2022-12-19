@@ -10,6 +10,16 @@ from v1.accounts import permissions as user_permission
 from django.shortcuts import get_object_or_404
 from django.db.models import Count, F
 
+# from common.library import decode
+from common import library as comm_lib
+
+
+class IddecodeModelViewSet(viewsets.ModelViewSet):
+
+    def get_object(self):
+        return self.basename.objects.get(
+            pk=comm_lib._decode(self.kwargs['pk']))
+
 
 class LeadViewSet(viewsets.ModelViewSet):
     """
@@ -98,7 +108,7 @@ class LeadContactViewSet(viewsets.ModelViewSet):
     permission_classes = (user_permission.IsAuthenticated,)
     http_method_names = ['get','post']
     authentication_classes = []
-    
+
     
 class DashboardView(generics.ListAPIView):
     """
