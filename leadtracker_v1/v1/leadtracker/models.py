@@ -24,7 +24,7 @@ class Tag(AbstractBaseModel):
         updated_on(datetime): Last updated date of the object.
     """
     name = models.CharField(
-        max_length=100, verbose_name=_('Tag Name'))
+        max_length=100, verbose_name=_('Tag Name'), unique=True)
     
     def __str__(self):
         """String format of model object"""
@@ -76,7 +76,7 @@ class Organization(AbstractBaseModel):
     #     related_name='organizations', verbose_name=_('Lead ID'), 
         # blank=True, null=True, default=None)
     name = models.CharField(
-        max_length=100, verbose_name=_('Organization Name'))
+        max_length=100, verbose_name=_('Organization Name'), unique=True)
     email = models.EmailField(verbose_name=_('Organization Email'))
     website = models.CharField(
         max_length=500, default='', blank=True, null=True,
@@ -191,7 +191,7 @@ class Stage(AbstractBaseModel):
         related_name='stages', verbose_name=_('Preset ID'), 
         blank=True, null=True, default=None)
     name = models.CharField(
-        max_length=100, verbose_name=_('Stage Name'))
+        max_length=100, verbose_name=_('Stage Name'), unique=True)
     is_active = models.BooleanField(
         default=True, verbose_name=_('Is Active'))
     default = models.BooleanField(
@@ -227,7 +227,7 @@ class Question(AbstractBaseModel):
         related_name='questions', verbose_name=_('Preset ID'),
         blank=True, null=True, default=None)
     question = models.CharField(
-        max_length=500, verbose_name=_('Question'))
+        max_length=500, verbose_name=_('Question'), unique=True)
     type = models.IntegerField(
         default=lead_consts.QuestionType.COMMON,
         choices=lead_consts.QuestionType.choices(),
@@ -363,7 +363,7 @@ class Contact(AbstractBaseModel):
     """
     name = models.CharField(
         max_length=100,verbose_name=_('Name'))
-    email = models.EmailField(verbose_name=_('Email'))
+    email = models.EmailField(verbose_name=_('Email'), unique=True)
     organization = models.ForeignKey(
         'leadtracker.Organization', on_delete=models.CASCADE, 
         related_name="contact", verbose_name='Organization',

@@ -7,7 +7,7 @@ from v1.leadtracker import models as lead_model
 from v1.leadtracker.serializers import lead as lead_serializer
 from v1.accounts import permissions as user_permission
 
-from django.db.models import Count, F
+from django.db.models import Count, F, Sum
 
 from common import library as comm_lib
 
@@ -108,7 +108,7 @@ class LeadContactViewSet(viewsets.ModelViewSet):
     http_method_names = ['get','post']
     authentication_classes = []
 
-    
+
 class DashboardView(generics.ListAPIView):
     """
     View to list data in dashboard.

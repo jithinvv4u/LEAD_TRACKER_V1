@@ -100,10 +100,6 @@ class LeadListSerializer(serializers.ModelSerializer):
             "updated_on", "current_stage",
         )
 
-    # def to_representation(self, instance):
-    #     data = super().to_representation(instance)
-    #     return data
-
 
 class OptionSerializer(serializers.ModelSerializer):
     """
@@ -116,6 +112,14 @@ class OptionSerializer(serializers.ModelSerializer):
         model = lead_models.Option
         fields = ("idencode", "option", "question_id", "points", )
 
+    def create(self, validated_data):
+        if lead_models.Option.objects.filter(
+            question_id=validated_data['question_id'],
+            option=validated_data['option']):
+            raise serializers.ValidationError("Already exist.")
+        stage_answer = lead_models.Option.objects.create(**validated_data)
+        return stage_answer
+    
     def to_representation(self, instance):
         data = {
         'idencode' : instance.idencode,
@@ -161,7 +165,17 @@ class StageAnswerSerializer(serializers.ModelSerializer):
             "question_id", "option_id", "score",
         )
 
-
+    def create(self, validated_data):
+        if lead_models.StageAnswer.objects.filter(
+            lead_id=validated_data['lead_id'],
+            stage_id=validated_data['stage_id'],
+            question_id=validated_data['question_id'],
+            option_id=validated_data['option_id']).exists():
+            raise serializers.ValidationError("Already exist.")
+        stage_answer = lead_models.StageAnswer.objects.create(**validated_data)
+        return stage_answer
+    
+    
 class GeneralAnswerSerializer(serializers.ModelSerializer):
     """
     Serializer for Question.
@@ -179,6 +193,15 @@ class GeneralAnswerSerializer(serializers.ModelSerializer):
         model = lead_models.GeneralAnswer
         fields = (
             "idencode", "lead_id", "question_id", "option_id", "score", )
+        
+    def create(self, validated_data):
+        if lead_models.GeneralAnswer.objects.filter(
+            lead_id=validated_data['lead_id'],
+            question_id=validated_data['question_id'],
+            option_id=validated_data['option_id']).exists():
+            raise serializers.ValidationError("Already exist.")
+        general_answer = lead_models.GeneralAnswer.objects.create(**validated_data)
+        return general_answer
 
 
 class StageSerializer(serializers.ModelSerializer):
