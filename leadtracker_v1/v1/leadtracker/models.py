@@ -242,6 +242,7 @@ class Question(AbstractBaseModel):
     def __str__(self):
         return f'{self.question}'
 
+
 class Option(AbstractBaseModel):
     """
     Model to save options of each question.

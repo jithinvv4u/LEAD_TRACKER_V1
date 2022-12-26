@@ -4,9 +4,8 @@ from rest_framework import status
 from rest_framework.response import Response
 
 from v1.leadtracker import models as lead_model
-from v1.accounts import permissions as user_permission
 from v1.leadtracker.serializers import lead as lead_serializer
-from v1.leadtracker.functions import get_dashboard
+from v1.accounts import permissions as user_permission
 
 from django.db.models import Count, F, Sum
 
@@ -76,6 +75,17 @@ class GeneralAnswerView(generics.ListCreateAPIView):
     authentication_classes = []
 
 
+class LeadListView(generics.ListCreateAPIView):
+    """
+    ViewSet to get list of leads data.
+    """
+
+    queryset = lead_model.Lead.objects.all()
+    serializer_class = lead_serializer.LeadListSerializer
+    permission_classes = (user_permission.IsAuthenticated,)
+    authentication_classes = []
+
+
 class ContactViewSet(viewsets.ModelViewSet):
     """
     ViewSet for manage Contact details.
@@ -98,6 +108,7 @@ class LeadContactViewSet(viewsets.ModelViewSet):
     http_method_names = ['get','post']
     authentication_classes = []
 
+
 class DashboardView(generics.ListAPIView):
     """
     View to list data in dashboard.
@@ -108,25 +119,30 @@ class DashboardView(generics.ListAPIView):
     
     def list(self, request, format=None,user=None):
         """
-        call get_dashboard function to get data.
+        Return a list of all stages and lead details.
         """
-        return Response(get_dashboard(),status=status.HTTP_200_OK,)
+        lead_total = lead_model.Lead.objects.all().count()
+        lead_won = lead_model.Lead.objects.filter(status=2).count()
+        lead_lost = lead_model.Lead.objects.filter(status=3).count()
+        lead_stage = (lead_model.Lead.objects.values(
+            stage=F("current_stage__name"))
+            .annotate(count=Count("current_stage"))
+            .order_by("-count")
+        )
+        all_stages = (lead_model.Stage.objects.values("name"))
+                
+        # lead_score = lead_model.StageAnswer.objects.values(
+        #     'lead_id__name').annotate(
+        #         total_point=Sum('option_id__points'),total_credit=Sum('question_id'),score=Sum(F('total_point') * ('total_credit'))).order_by('lead_id')
+        # print(lead_score)
         
-        
-# class MakeLeadWon(generics.UpdateAPIView):
-#     serializer_class = lead_serializer.LeadSerializer
-#     queryset = lead_model.Lead
-    
-#     def patch(self, request, *args, **kwargs):
-#         return super().patch(request, *args, **kwargs)
-    
-    
-# class LeadListView(generics.ListCreateAPIView):
-#     """
-#     ViewSet to get list of leads data.
-#     """
-
-#     queryset = lead_model.Lead.objects.all()
-#     serializer_class = lead_serializer.LeadListSerializer
-#     permission_classes = (user_permission.IsAuthenticated,)
-#     authentication_classes = []
+        return Response(
+            {
+                "lead_total": lead_total,
+                "lead_won": lead_won,
+                "lead_lost": lead_lost,
+                "lead_stage": lead_stage,
+                "stages": all_stages,
+            },
+            status=status.HTTP_200_OK,
+        )

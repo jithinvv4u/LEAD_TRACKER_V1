@@ -20,7 +20,7 @@ router.register("question", lead_view.QuestionView,
 urlpatterns = [
     path("", include(router.urls)),
     
-    path("leadlist/", lead_view.LeadListView.as_view()),
+    # path("leadlist/", lead_view.LeadListView.as_view()),
     #url to view questions
     # path("question/", lead_view.QuestionView.as_view()),
     #url to create and view answers
@@ -28,5 +28,7 @@ urlpatterns = [
     path("generalanswer/", lead_view.GeneralAnswerView.as_view()),
     
     path("dashboard/", lead_view.DashboardView.as_view()),
+    
+    # path("makewon/", lead_view.MakeLeadWon.as_view()),
 
 ]

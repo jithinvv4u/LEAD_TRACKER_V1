@@ -77,28 +77,23 @@ class LeadSerializer(serializers.ModelSerializer):
         raise serializers.ValidationError(
             _("Lead Name should be greater than 3"))
 
+    def to_representation(self, instance):
+        data = {
+        'idencode' : instance.idencode,
+        'name' : instance.name,
+        'organization' : instance.organization.name,
+        'updated_on' : instance.updated_on,
+        'current_stage' : instance.current_stage.name,
+        'status' : instance.status,
+        }
+        return data
+    
     # def create(self, validated_data):
     #     organization_data = validated_data.pop("organization")
     #     lead = lead_models.Lead.objects.create(**validated_data)
     #     for organization in organization_data:
     #         lead_models.Organization.objects.create(lead_id=lead, **organization)
     #     return lead
-    
-
-class LeadListSerializer(serializers.ModelSerializer):
-    """
-    Serializer for Lead, create with organization(
-        user can select or create one).
-    """
-
-    class Meta:
-        """Meta Info"""
-
-        model = lead_models.Lead
-        fields = (
-            "idencode", "name", "organizations",
-            "updated_on", "current_stage",
-        )
 
 
 class OptionSerializer(serializers.ModelSerializer):
@@ -140,7 +135,7 @@ class QuestionSerializer(serializers.ModelSerializer):
         """Meta Info"""
 
         model = lead_models.Question
-        fields = ("idencode", "question", "options")
+        fields = ("idencode", "question", "type", "field_type", "options")
 
 
 class StageAnswerSerializer(serializers.ModelSerializer):
@@ -250,3 +245,19 @@ class LeadContactSerializer(serializers.ModelSerializer):
         fields = (
             "idencode", "contact_id", "lead_id", "stage_id",
             "is_decision_maker", "is_board_member", )
+
+
+# class LeadListSerializer(serializers.ModelSerializer):
+#     """
+#     Serializer for Lead, create with organization(
+#         user can select or create one).
+#     """
+
+#     class Meta:
+#         """Meta Info"""
+
+#         model = lead_models.Lead
+#         fields = (
+#             "idencode", "name", "organizations",
+#             "updated_on", "current_stage",
+#         )
