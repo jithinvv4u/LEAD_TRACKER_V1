@@ -38,7 +38,7 @@ class QuestionAdmin(BaseAdmin):
 
 
 class OptionAdmin(BaseAdmin):
-    list_display = ("id", "option", "points", "is_active", )
+    list_display = ("id", "question_id", "option", "points", "is_active", )
     search_fields = ["option"]
 
 

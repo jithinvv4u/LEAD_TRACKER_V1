@@ -307,6 +307,10 @@ class StageAnswer(AbstractBaseModel):
         'leadtracker.Stage', on_delete=models.CASCADE,
         related_name='stageanswers', verbose_name=_('Stage'), 
         blank=True, null=True, default=None)
+    # contact_id = models.ForeignKey(
+    #     'lead_tracker.Contact', on_delete=models.CASCADE,
+    #     related_name='stageanswers', verbose_name=_('Contact'), 
+    #     blank=True, null=True, default=None)
     is_active = models.BooleanField(
         default=True, verbose_name=_('Is Active'))
     score = models.IntegerField(default=0)

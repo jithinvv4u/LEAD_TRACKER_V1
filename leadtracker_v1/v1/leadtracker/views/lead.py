@@ -98,6 +98,7 @@ class LeadContactViewSet(viewsets.ModelViewSet):
     http_method_names = ['get','post']
     authentication_classes = []
 
+
 class DashboardView(generics.ListAPIView):
     """
     View to list data in dashboard.
@@ -119,7 +120,6 @@ class DashboardView(generics.ListAPIView):
     
 #     def patch(self, request, *args, **kwargs):
 #         return super().patch(request, *args, **kwargs)
-    
     
 # class LeadListView(generics.ListCreateAPIView):
 #     """
