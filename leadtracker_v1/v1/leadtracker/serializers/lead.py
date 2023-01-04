@@ -48,8 +48,7 @@ class OrganizationSerializer(serializers.ModelSerializer):
         model = lead_models.Organization
         fields = (
             "idencode", "name", "email",
-            "website", "country",
-        )
+            "website", "country", )
 
 
 class LeadSerializer(serializers.ModelSerializer):
@@ -58,7 +57,7 @@ class LeadSerializer(serializers.ModelSerializer):
         user can select or create one).
     """
 
-    # organizations = OrganizationSerializer(many=True)
+    # organizations = OrganizationSerializer(required=False)
     organization = custom_fields.IdencodeField(
         related_model=lead_models.Organization)
     
@@ -77,16 +76,23 @@ class LeadSerializer(serializers.ModelSerializer):
         raise serializers.ValidationError(
             _("Lead Name should be greater than 3"))
 
-    def to_representation(self, instance):
-        data = {
-        'idencode' : instance.idencode,
-        'name' : instance.name,
-        'organization' : instance.organization.name,
-        'updated_on' : instance.updated_on,
-        'current_stage' : instance.current_stage.name,
-        'status' : instance.status,
-        }
-        return data
+    # def to_representation(self, instance):
+    #     data = {
+    #     'idencode' : instance.idencode,
+    #     'name' : instance.name,
+    #     'organization' : instance.organization.name,
+    #     'updated_on' : instance.updated_on,
+    #     'current_stage' : instance.current_stage.name,
+    #     'status' : instance.status,
+    #     }
+    #     return data
+    
+    def create(self, validated_data):
+        organization_data = validated_data["organization"]
+        if lead_models.Organization.objects.filter(name=organization_data):
+            lead = lead_models.Lead.objects.create(**validated_data)
+        lead_models.Organization.objects.create(name=organization_data,)
+        return lead
     
     # def create(self, validated_data):
     #     organization_data = validated_data.pop("organization")
@@ -161,14 +167,28 @@ class StageAnswerSerializer(serializers.ModelSerializer):
         )
 
     def create(self, validated_data):
-        if lead_models.StageAnswer.objects.filter(
-            lead_id=validated_data['lead_id'],
-            stage_id=validated_data['stage_id'],
-            question_id=validated_data['question_id'],
-            option_id=validated_data['option_id']).exists():
-            raise serializers.ValidationError("Already exist.")
-        stage_answer = lead_models.StageAnswer.objects.create(**validated_data)
+        if lead_models.Option.objects.filter(
+            question_id__question=validated_data['question_id'],
+            option=validated_data['option_id']).exists():
+            if lead_models.StageAnswer.objects.filter(
+                lead_id=validated_data['lead_id'],
+                stage_id=validated_data['stage_id'],
+                question_id=validated_data['question_id'],
+                option_id=validated_data['option_id']).exists():
+                raise serializers.ValidationError("Already selected.")
+            stage_answer = lead_models.StageAnswer.objects.create(
+                **validated_data)
+        else:
+            raise serializers.ValidationError(
+                'no question with selected option')
         return stage_answer
+    
+    def update(self, instance, validated_data):
+        if lead_models.Option.objects.filter(
+            question_id__question=validated_data['question_id'],
+            option=validated_data['option_id']).exists():
+            return super().update(instance, validated_data)
+        raise serializers.ValidationError('no question with selected option')
     
     
 class GeneralAnswerSerializer(serializers.ModelSerializer):
@@ -190,14 +210,28 @@ class GeneralAnswerSerializer(serializers.ModelSerializer):
             "idencode", "lead_id", "question_id", "option_id", "score", )
         
     def create(self, validated_data):
-        if lead_models.GeneralAnswer.objects.filter(
-            lead_id=validated_data['lead_id'],
-            question_id=validated_data['question_id'],
-            option_id=validated_data['option_id']).exists():
-            raise serializers.ValidationError("Already exist.")
-        general_answer = lead_models.GeneralAnswer.objects.create(**validated_data)
+        if lead_models.Option.objects.filter(
+            question_id__question=validated_data['question_id'],
+            option=validated_data['option_id']).exists():
+            if lead_models.GeneralAnswer.objects.filter(
+                lead_id=validated_data['lead_id'],
+                question_id=validated_data['question_id'],
+                option_id=validated_data['option_id']).exists():
+                raise serializers.ValidationError("Already selected.")
+            general_answer = lead_models.GeneralAnswer.objects.create(
+                **validated_data)
+        else:
+            raise serializers.ValidationError(
+                'no question with selected option')
         return general_answer
 
+    def update(self, instance, validated_data):
+        if lead_models.Option.objects.filter(
+            question_id__question=validated_data['question_id'],
+            option=validated_data['option_id']).exists():
+            return super().update(instance, validated_data)
+        raise serializers.ValidationError('no question with selected option')
+    
 
 class StageSerializer(serializers.ModelSerializer):
     """
@@ -245,19 +279,3 @@ class LeadContactSerializer(serializers.ModelSerializer):
         fields = (
             "idencode", "contact_id", "lead_id", "stage_id",
             "is_decision_maker", "is_board_member", )
-
-
-# class LeadListSerializer(serializers.ModelSerializer):
-#     """
-#     Serializer for Lead, create with organization(
-#         user can select or create one).
-#     """
-
-#     class Meta:
-#         """Meta Info"""
-
-#         model = lead_models.Lead
-#         fields = (
-#             "idencode", "name", "organizations",
-#             "updated_on", "current_stage",
-#         )

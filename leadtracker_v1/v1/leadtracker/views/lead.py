@@ -8,16 +8,15 @@ from v1.accounts import permissions as user_permission
 from v1.leadtracker.serializers import lead as lead_serializer
 from v1.leadtracker.functions import get_dashboard
 
-from django.db.models import Count, F, Sum
-
 from common import library as comm_lib
 
 
 class IddecodeModelViewSet(viewsets.ModelViewSet):
 
     def get_object(self):
+        print(self.basename)
         return self.basename.objects.get(
-            pk=comm_lib._decode(self.kwargs['pk']))
+            pk=comm_lib.decode(self.kwargs['pk']))
 
 
 class LeadViewSet(IddecodeModelViewSet):
@@ -30,9 +29,9 @@ class LeadViewSet(IddecodeModelViewSet):
     serializer_class = lead_serializer.LeadSerializer
     permission_classes = (user_permission.IsAuthenticated,)
     authentication_classes = []
+    
 
-
-class OrganizationView(viewsets.ModelViewSet):
+class OrganizationView(IddecodeModelViewSet):
     """
     View to perform operations on Organization.
     """
@@ -43,7 +42,7 @@ class OrganizationView(viewsets.ModelViewSet):
     authentication_classes = []
 
 
-class QuestionView(viewsets.ModelViewSet):
+class QuestionView(IddecodeModelViewSet):
     """
     Viewset to list all question with options.
     """
@@ -54,7 +53,7 @@ class QuestionView(viewsets.ModelViewSet):
     authentication_classes = []
 
 
-class StageAnswerView(generics.ListCreateAPIView):
+class StageAnswerView(IddecodeModelViewSet):
     """
     View for create and list Stage Answers.
     """
@@ -65,7 +64,7 @@ class StageAnswerView(generics.ListCreateAPIView):
     authentication_classes = []
 
 
-class GeneralAnswerView(generics.ListCreateAPIView):
+class GeneralAnswerView(IddecodeModelViewSet):
     """
     View for create and list General Answers.
     """
@@ -76,7 +75,7 @@ class GeneralAnswerView(generics.ListCreateAPIView):
     authentication_classes = []
 
 
-class ContactViewSet(viewsets.ModelViewSet):
+class ContactViewSet(IddecodeModelViewSet):
     """
     ViewSet for manage Contact details.
     """
@@ -87,7 +86,7 @@ class ContactViewSet(viewsets.ModelViewSet):
     authentication_classes = []
 
 
-class LeadContactViewSet(viewsets.ModelViewSet):
+class LeadContactViewSet(IddecodeModelViewSet):
     """
     ViewSet for lead contact details.
     """
@@ -95,10 +94,10 @@ class LeadContactViewSet(viewsets.ModelViewSet):
     queryset = lead_model.LeadContact.objects.all()
     serializer_class = lead_serializer.LeadContactSerializer
     permission_classes = (user_permission.IsAuthenticated,)
-    http_method_names = ['get','post']
+    # http_method_names = ['get','post']
     authentication_classes = []
 
-
+    
 class DashboardView(generics.ListAPIView):
     """
     View to list data in dashboard.
@@ -114,19 +113,11 @@ class DashboardView(generics.ListAPIView):
         return Response(get_dashboard(),status=status.HTTP_200_OK,)
         
         
-# class MakeLeadWon(generics.UpdateAPIView):
+# class MakeLeadWon(viewsets.ModelViewSet):
 #     serializer_class = lead_serializer.LeadSerializer
 #     queryset = lead_model.Lead
+#     http_method_names = ['patch']
     
-#     def patch(self, request, *args, **kwargs):
-#         return super().patch(request, *args, **kwargs)
-    
-# class LeadListView(generics.ListCreateAPIView):
-#     """
-#     ViewSet to get list of leads data.
-#     """
-
-#     queryset = lead_model.Lead.objects.all()
-#     serializer_class = lead_serializer.LeadListSerializer
-#     permission_classes = (user_permission.IsAuthenticated,)
-#     authentication_classes = []
+#     def partial_update(self, request, *args, **kwargs):
+#         kwargs['partial'] = True
+#         return super().partial_update(request, *args, **kwargs)

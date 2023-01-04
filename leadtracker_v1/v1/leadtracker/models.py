@@ -147,7 +147,7 @@ class Lead(AbstractBaseModel):
         """String format of model object"""
         return f'{self.name,self.lead_source}'
 
-    
+
 class LeadTag(AbstractBaseModel):
     """
     Model to save lead tag details.
@@ -373,9 +373,12 @@ class Contact(AbstractBaseModel):
         'leadtracker.Organization', on_delete=models.CASCADE, 
         related_name="contact", verbose_name='Organization',
         blank=True, null=True, default=None)
-    role = models.CharField(
-        max_length=100, default='', blank=True, null=True,
-        verbose_name=_('Role'))
+    # role = models.CharField(
+    #     max_length=100, default='', blank=True, null=True,
+    #     verbose_name=_('Role'))
+    role = models.IntegerField(
+        choices=lead_consts.RoleChoice.choices(),
+        default='', verbose_name=_('Contact Role'))
     linkedin = models.URLField(
         max_length=1024, default='', blank=True, null=True,
         verbose_name=_('LinkedIn'))

@@ -31,4 +31,3 @@ def get_dashboard():
             "stages": all_stages,
             "possibility":possibility,
     }
-    

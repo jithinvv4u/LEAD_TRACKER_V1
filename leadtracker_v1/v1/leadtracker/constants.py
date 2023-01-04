@@ -28,3 +28,11 @@ class StatusChoice(ChoiceAdapter):
     ACTIVE = 1, 
     WON = 2, 
     LOST = 3, 
+    
+class RoleChoice(ChoiceAdapter):
+    CEO = 1,
+    PROJRCT_MANAGER = 2,
+    SENIOR_BACKEND_DEVELOPER = 3,
+    SENIOR_FRONTEND_DEVELOPER = 4,
+    JUNIOR_BACKEND_DEVELOPER = 5,
+    JUNIOR_FRONTEND_DEVELOPER = 6,
