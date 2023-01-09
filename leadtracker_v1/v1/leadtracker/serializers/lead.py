@@ -70,7 +70,7 @@ class LeadSerializer(serializers.ModelSerializer):
             "revenue", "lead_source", "organization"
         )
         
-    def validate(self, attrs):
+    def validate_name(self, attrs):
         if len(attrs['name']) > 3:
             return attrs
         raise serializers.ValidationError(
@@ -123,7 +123,7 @@ class OptionSerializer(serializers.ModelSerializer):
     
     def to_representation(self, instance):
         data = {
-        'idencode' : instance.idencode,
+        'id' : instance.idencode,
         'option' : instance.option,
         }
         return data
@@ -244,7 +244,7 @@ class StageSerializer(serializers.ModelSerializer):
         model = lead_models.Stage
         fields = ( "idencode", "name", "weightage", "credit", )
 
-
+    
 class ContactSerializer(serializers.ModelSerializer):
     """
     Serializer for Contact.
